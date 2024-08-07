@@ -3,9 +3,11 @@
 Asynchronous wrapper for MariaDB library (mariadb-connector-python) written in python.
 
 > [!IMPORTANT]
-> This library is still under early development. Please create an [issue](https://github.com/xRedCrystalx/aiomaria/issues/new) here.
+> This library is still under early development. For any bugs, please create an issue [here](https://github.com/xRedCrystalx/aiomaria/issues/new).
 
 ## Example
+
+### Basic connection
 
 ```py
 import aiomaria, asyncio
@@ -34,7 +36,7 @@ pool: aiomaria.Connection = await aiomaria.connect(**credentials, pool_name="tes
 ```
 
 > [!NOTE]
-> `.connect` will always return `aiomaria.Connection`. Pool can be accessed from the `_CONNECTION_POOLS` dictionary with its name.
+> `.connect()` will always return `aiomaria.Connection`. Pool can be accessed from the `aiomaria._CONNECTION_POOLS` dictionary with its name.
 
 ### With async context manager
 
@@ -50,7 +52,7 @@ async with aiomaria.ConnectionPool(**credentials, pool_name="test") as pool:
 ```
 
 > [!CAUTION]
-> Due to how wrapper works, `mariadb` module will no longer work once the `aiomaria` is imported. This is due to monkeypatching at runtime and hopefully will be resolved in the future.
+> Due to how wrapper works, `mariadb` library will no longer work once the `aiomaria` is imported. This is due to monkeypatching at runtime and will hopefully be resolved in the future.
 
 ## Installation
 
