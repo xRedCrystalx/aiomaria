@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .connections import Connection
 
 class ConnectionPool(ConP):
-    def __init__(self, pool_name: str, pool_size: int = 5, pool_reset_connection: bool = True) -> None:
+    def __init__(self, pool_name: str, pool_size: int = 5, pool_reset_connection: bool = True, **kwargs) -> None:
         """
         Creates a connection pool class
 
@@ -21,11 +21,12 @@ class ConnectionPool(ConP):
         - `pool_reset_connection` -  Will reset the connection before returning it to the pool. 
         """
         self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
-        super().__init__(pool_name, pool_size, pool_reset_connection)
+        super().__init__(pool_name, pool_size, pool_reset_connection, **kwargs)
 
+    # NOTE: this function is blocking due to creation of `Connection`, which requires to be in a thread with running asyncio loop.
     @override
     async def add_connection(self, connection=None) -> Connection | None:
-        return await self.loop.run_in_executor(None, super().add_connection, connection)
+        return super().add_connection(connection)
     
     @override
     async def get_connection(self) -> Connection:
@@ -59,10 +60,6 @@ class ConnectionPool(ConP):
     def pool_reset_connection(self) -> bool:
         return super().pool_reset_connection
 
-    
-"""
-_replace_connection -> [.add_connection], connection.close
-get_connection -> _replace_connection
-_close_connection -> connection.reset, connection.rollback, ._replace_connection
-close -> connection.close
-"""
+    @pool_reset_connection.setter
+    def pool_reset_connection(self, reset) -> None:
+        return super().pool_reset_connection(reset)

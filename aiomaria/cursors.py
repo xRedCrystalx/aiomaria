@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys, asyncio
 sys.dont_write_bytecode = True
-from typing import Sequence, Literal, Self, override, Any, List, TYPE_CHECKING
+from typing import Sequence, Literal, Self, override, Any, TYPE_CHECKING
 
 from mariadb.cursors import (
     PARAMSTYLE_QMARK, PARAMSTYLE_FORMAT, PARAMSTYLE_PYFORMAT,
@@ -28,32 +28,22 @@ class Cursor(Crs):
 
     @override
     async def callproc(self, sp: str, data: Sequence[Any] = None) -> None:
-        """
-        Executes a stored procedure `sp`. The data sequence must contain an entry for each parameter the procedure expects.
-
-        Input/Output or Output parameters have to be retrieved by `.fetch` methods, the `.sp_outparams`
-        attribute indicates if the result set contains output parameters.
-        """
         if not data:
-            data: List = []
+            data: list = []
         return await self.loop.run_in_executor(None, super().callproc, sp, data)
-    
-    # TODO: s
+
     @override
-    async def nextset(self):
-        ns = await self.loop.run_in_executor(None, super().nextset)
-        print(ns)
-        return ns
-    
-    # TODO: l
+    async def nextset(self) -> None: 
+        return await self.loop.run_in_executor(None, super().nextset)
+
     @override
-    async def execute(self, statement: str, data: Sequence = ..., buffered=None):
-        return super().execute(statement, data, buffered)
+    async def execute(self, statement: str, data: Sequence = None, buffered = None) -> None:
+        return await self.loop.run_in_executor(None, super().execute, statement, data, buffered)
     
     # TODO: l
     @override
     async def executemany(self, statement: str, parameters: Sequence[str]):
-        return super().executemany(statement, parameters)
+        return await self.loop.run_in_executor(None, super().executemany, statement, parameters)
 
     @override
     async def close(self) -> None:
@@ -89,7 +79,7 @@ class Cursor(Crs):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Closes cursor."""
-        self.close()
+        await self.close()
 
     @property
     def rowcount(self) -> int:
